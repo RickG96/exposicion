@@ -14,9 +14,12 @@ var con = mysql.createConnection({
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
+//app.set('pages', path.join(__dirname, 'pages'));
+app.use(express.static('pages'))
+app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-    res.json("ok");
+    res.render('consulta1');
 });
 
 app.get('/getconsulta1', (req, res) => {
@@ -32,7 +35,7 @@ app.get('/getconsulta1', (req, res) => {
     con.query(queryC1, (err, result, fields) => {
         if (err) throw err;
         
-        res.json(result);
+        res.render('consulta1', {data: result});
      });
 });
 
@@ -48,7 +51,7 @@ app.get('/getconsulta8', (req, res) => {
     con.query(queryC1, (err, result, fields) => {
         if (err) throw err;
         
-        res.json(result);
+        res.render('consulta8', {data: result});
      });
 });
 
@@ -63,7 +66,7 @@ where i.cod_invento = o.cod_invento and i.cod_inventor = r.cod_inventor and subs
     con.query(queryC1, (err, result, fields) => {
         if (err) throw err;
         
-        res.json(result);
+        res.render('consulta9', {data: result});
      });
 });
 
@@ -79,21 +82,39 @@ where i.cod_invento = o.cod_invento and i.cod_inventor = r.cod_inventor and subs
     con.query(queryC1, (err, result, fields) => {
         if (err) throw err;
         
-        res.json(result);
+        res.render('consulta10', {data: result});
      });
 });
 
 app.get('/getconsulta12', (req, res) => {
     const queryC1 = `
     select
-    nombre_invento
+    nombre_invento as "nombre"
 from invento
 where substring(nombre_invento, 1, 1) = "L" and  char_length('nombre_invento') = 4
     `;
     con.query(queryC1, (err, result, fields) => {
         if (err) throw err;
         
-        res.json(result);
+        res.render('consulta12', {data: result});
+     });
+});
+
+app.get('/getconsulta15', (req, res) => {
+    const queryC1 = `
+    select 
+	nombre_pais as "pais",
+    poblacion as "poblacion"
+from pais
+where cast(poblacion as unsigned) > (select
+	sum(cast(poblacion as unsigned))
+from pais
+where cod_region = 4)
+    `;
+    con.query(queryC1, (err, result, fields) => {
+        if (err) throw err;
+        
+        res.render('consulta15', {data: result});
      });
 });
 
