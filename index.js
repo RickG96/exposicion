@@ -4,11 +4,11 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 
 var con = mysql.createConnection({
-    host: "bd-proyecto2-do-user-4931420-0.a.db.ondigitalocean.com",
-    port: "25060",
-    user: "doadmin",
-    password: "s9np5hvgbctyiq0l",
-    database: "defaultdb"
+    host: "192.241.135.82",
+    port: "3306",
+    user: "runi",
+    password: "runi2k18",
+    database: "runi"
 });
 
 var app = express();
@@ -19,53 +19,83 @@ app.get('/', (req, res) => {
     res.json("ok");
 });
 
-app.get('/getpokemon/:id?', (req, res) => {
-    if(req.params.id){
-        con.query("SELECT * FROM pokemon WHERE numero_pokedex = " + mysql.escape(req.params.id), (err, result, fields) => {
-            if (err) throw err;
-            
-            res.json(result);
-        });
-    } else {
-        con.query("SELECT * FROM pokemon", (err, result, fields) => {
-            if (err) throw err;
-            
-            res.json(result);
-         });
-    }
-});
-
-app.delete('/deletepokemon/:id', (req, res) => {
-    if(req.params.id){
-        con.query("DELETE FROM pokemon WHERE numero_pokedex = " + mysql.escape(req.params.id), (err, result, fields) => {
-            if (err) throw err;
-            
-            res.json("deleted!");
-        });
-    } else {
-        res.json("error");
-    }
-});
-
-app.post('/insertpokemon', (req, res) => {
-    let insertSql = "INSERT INTO pokemon (numero_pokedex, nombre, avatar, tipo) VALUES ?";
-    let values = [
-        [req.body.numero_pokedex, req.body.nombre, req.body.avatar, req.body.tipo]
-    ]
-    con.query(insertSql, [values], (err, result) => {
+app.get('/getconsulta1', (req, res) => {
+    const queryC1 = `
+    select 
+        p.nombre_profesional as "nombre",
+        count(ip.cod_profesional) as "cantidad"
+    from profesional_invento ip, profecional p
+    where ip.cod_profesional = p.cod_profesional
+    group by p.nombre_profesional
+    order by count(ip.cod_profesional) desc
+    `;
+    con.query(queryC1, (err, result, fields) => {
         if (err) throw err;
-        res.json('inserted!');
-    });
+        
+        res.json(result);
+     });
 });
 
-app.put('/updatepokemon', (req, res) => {
-    let updateSql = "UPDATE pokemon SET nombre = " + mysql.escape(req.body.nombre) + ", avatar = " + mysql.escape(req.body.avatar) + ", tipo = " + mysql.escape(req.body.tipo) + " WHERE numero_pokedex = " + mysql.escape(req.body.numero_pokedex);
-    con.query(updateSql, (err, result) => {
-        if(err) throw err;
+app.get('/getconsulta8', (req, res) => {
+    const queryC1 = `
+    select
+        substring(nombre_pais, 1, 1) as "inicial",
+        sum(area_km2) as "suma_area"
+    from pais
+    group by substring(nombre_pais, 1, 1)
+    order by substring(nombre_pais, 1, 1)
+    `;
+    con.query(queryC1, (err, result, fields) => {
+        if (err) throw err;
+        
+        res.json(result);
+     });
+});
 
-        res.json("updated!");
-    })
-}); 
+app.get('/getconsulta9', (req, res) => {
+    const queryC1 = `
+    select 
+    r.nombre_inventor as "inventor",
+    o.nombre_invento as "invento"
+from inventado i, invento o, inventor r
+where i.cod_invento = o.cod_invento and i.cod_inventor = r.cod_inventor and substring(r.nombre_inventor, 1, 2) = "Be"
+    `;
+    con.query(queryC1, (err, result, fields) => {
+        if (err) throw err;
+        
+        res.json(result);
+     });
+});
+
+app.get('/getconsulta10', (req, res) => {
+    const queryC1 = `
+    select 
+    r.nombre_inventor as "nombre",
+    o.nombre_invento as "invento",
+    o.anio_invento as "año"
+from inventado i, invento o, inventor r
+where i.cod_invento = o.cod_invento and i.cod_inventor = r.cod_inventor and substring(r.nombre_inventor, 1, 1) = "B" and (substring(r.nombre_inventor, -1, 1) = "r" or substring(r.nombre_inventor, -1, 2) = "n") and (year(concat(o.anio_invento, "-01-01")) between year("1800-01-01") and year("1900-01-01"))
+    `;
+    con.query(queryC1, (err, result, fields) => {
+        if (err) throw err;
+        
+        res.json(result);
+     });
+});
+
+app.get('/getconsulta12', (req, res) => {
+    const queryC1 = `
+    select
+    nombre_invento
+from invento
+where substring(nombre_invento, 1, 1) = "L" and  char_length('nombre_invento') = 4
+    `;
+    con.query(queryC1, (err, result, fields) => {
+        if (err) throw err;
+        
+        res.json(result);
+     });
+});
 
 app.listen(3000, (err) => {
     if (err) console.log('Ocurrio un error'), process.exit(1);
